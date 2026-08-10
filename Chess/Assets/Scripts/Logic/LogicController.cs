@@ -12,14 +12,23 @@ public class LogicController : MonoBehaviour
     private bool shortHoqueBlack = true;
 
     private Move lastMovement;
+    private bool isWhiteTurn = true;
 
 
-    List<List<Piece>> board = new List<List<Piece>>(8);
-
+    Board board = new Board();
+    MoveValidator moveValidator = new MoveValidator();
 
     void Start()
     {
-        
+        board.PlacePiece(new Pawn(), new Coordinates(0, 0));
+        board.table[0,0].SetColor(true);
+        board.PlacePiece(new Pawn(), new Coordinates(1, 1));
+        board.table[1, 1].SetColor(true);
+        board.PrintBoard();
+        foreach (Coordinates item in board.GetPieceAt(new Coordinates(0, 0)).GenerateMoves(board))
+        {
+            Debug.Log(item.x + " " + item.y);
+        }
     }
 
     // Update is called once per frame
@@ -27,27 +36,34 @@ public class LogicController : MonoBehaviour
     {
         
     }
+
+    void MovePiece(Coordinates from, Coordinates to)
+    {
+        board.MovePiece(from, to);
+    }
+
 }
 
 public struct Move
 {
     public Piece piece;
-    public int previousIndex;
-    public int newIndex;
+    public Coordinates lastCoordinate;
+    public Coordinates newCoordinate;
 }
 
-public struct State
+public struct GameState
 {
-    bool granHoqueWhite;
-    bool grandHoqueBlack;
-    bool shortHoqueWhite;
-    bool shortHoqueBlack;
+    public bool granHoqueWhite;
+    public bool grandHoqueBlack;
+    public bool shortHoqueWhite;
+    public bool shortHoqueBlack;
+    public bool isWhiteTurn;
 
-    private Move lastMovement;
+    public Move lastMovement;
 
-    List<List<Piece>> board;
+    public Board board;
 
-    public State(bool granHoqueWhite, bool grandHoqueBlack, bool shortHoqueWhite, bool shortHoqueBlack, Move lastMovement, List<List<Piece>> board)
+    public GameState(bool granHoqueWhite, bool grandHoqueBlack, bool shortHoqueWhite, bool shortHoqueBlack, Move lastMovement, Board board, bool isWhiteTurn)
     {
         this.granHoqueWhite = granHoqueWhite;
         this.grandHoqueBlack = grandHoqueBlack;
@@ -55,5 +71,18 @@ public struct State
         this.shortHoqueBlack = shortHoqueBlack;
         this.lastMovement = lastMovement;
         this.board = board;
+        this.isWhiteTurn = isWhiteTurn;
+    }
+}
+
+public struct Coordinates
+{
+    public int x;
+    public int y;
+
+    public Coordinates(int x, int y)
+    {
+        this.x = x;
+        this.y = y;
     }
 }
