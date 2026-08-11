@@ -15,20 +15,14 @@ public class LogicController : MonoBehaviour
     private bool isWhiteTurn = true;
 
 
-    Board board = new Board();
+    Board board;
     MoveValidator moveValidator = new MoveValidator();
 
     void Start()
     {
-        board.PlacePiece(new Pawn(), new Coordinates(0, 0));
-        board.table[0,0].SetColor(true);
-        board.PlacePiece(new Pawn(), new Coordinates(1, 1));
-        board.table[1, 1].SetColor(true);
+        board = new Board();
         board.PrintBoard();
-        foreach (Coordinates item in board.GetPieceAt(new Coordinates(0, 0)).GenerateMoves(board))
-        {
-            Debug.Log(item.x + " " + item.y);
-        }
+        
     }
 
     // Update is called once per frame
