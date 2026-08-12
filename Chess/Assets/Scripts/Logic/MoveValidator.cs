@@ -48,7 +48,7 @@ public class MoveValidator
         Coordinates lastCoordinate = lastMovement.lastCoordinate;
         Coordinates newCoordinate = lastMovement.newCoordinate;
         Coordinates enPassantCoordinate = new Coordinates(-1, -1);
-        if (!(lastMovement.piece is Pawn))
+        if (!(lastMovement.pieceMoved is Pawn))
         {
             return enPassantCoordinate;
         }
@@ -56,7 +56,7 @@ public class MoveValidator
         {
             return enPassantCoordinate;
         }
-        int lastPawnDirection = lastMovement.piece.IsWhite() ? 1 : -1;
+        int lastPawnDirection = lastMovement.pieceMoved.IsWhite() ? 1 : -1;
 
         if(Mathf.Abs(lastCoordinate.x - newCoordinate.x) != 2)
         {

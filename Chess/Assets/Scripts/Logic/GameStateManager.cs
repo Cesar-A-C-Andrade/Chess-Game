@@ -14,6 +14,11 @@ public class GameStateManager
     {
         return lastState;
     }
+
+    public void PrintState()
+    {
+        Debug.Log($"GranHoqueWhite {lastState.granHoqueWhite}, GranHoqueBlack {lastState.grandHoqueBlack}, ShortHoqueWhite {lastState.shortHoqueWhite}, ShortHoqueBlack {lastState.shortHoqueBlack}, Turn {lastState.isWhiteTurn}");
+    }
     
 }
 

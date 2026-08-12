@@ -6,13 +6,7 @@ public class Pawn : Piece
     public bool isWhite;
     public Coordinates position;
     private int direction = 1; // 1 for white, -1 for black
-    private bool isFirstMove = true;
 
-
-    public Pawn()
-    {
-        SetIsFirstMove(true);
-    }
 
     public Coordinates[] GenerateMoves(Board board)
     {
@@ -24,7 +18,7 @@ public class Pawn : Piece
         if (board.IsEmptyHouse(frontMove))
         {
             coordinates.Add(frontMove);
-            if(isFirstMove && board.IsEmptyHouse(frontDoubleMove))
+            if(IsFirstMove() && board.IsEmptyHouse(frontDoubleMove))
             {
                 coordinates.Add(frontDoubleMove);
             }
@@ -68,15 +62,12 @@ public class Pawn : Piece
         this.position = position;
     }
 
-    public void SetIsFirstMove(bool value)
+    public bool IsFirstMove()
     {
-        isFirstMove = value;
+        int firstX = isWhite ? 1 : 6;
+        return firstX == position.x;
     }
 
-    public bool GetIsFirstMove()
-    {
-        return isFirstMove;
-    }
 
     public Piece DuplicatePiece()
     {

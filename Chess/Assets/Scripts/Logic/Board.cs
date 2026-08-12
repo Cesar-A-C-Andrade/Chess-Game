@@ -84,9 +84,10 @@ public class Board
         return pieces.ToArray();
     }
 
-    public void MovePiece(Coordinates from, Coordinates to)
+    public Move MovePiece(Coordinates from, Coordinates to)
     {
         Piece pieceToMove = GetPieceAt(from);
+        Piece pieceInLocation = GetPieceAt(to);
         if (pieceToMove != null)
         {
             table[to.x, to.y] = pieceToMove;
@@ -96,7 +97,9 @@ public class Board
             {
                 SetKingPosition(pieceToMove.IsWhite(), to);
             }
+            return new Move(pieceToMove, pieceInLocation, from, to);
         }
+        return new Move(null, null, from, to);
     }
 
     public void PlacePiece(Piece piece, Coordinates coordinates)
@@ -257,4 +260,16 @@ public class Board
         return piece;
     }
 
+    public void UndoMove(Move lastMove)
+    {
+        Piece pieceDestroyed = lastMove.pieceDestroyed;
+        Piece pieceMoved = lastMove.pieceMoved;
+        MovePiece(lastMove.newCoordinate, lastMove.lastCoordinate);
+        if (pieceDestroyed == null)
+        {
+            table[lastMove.newCoordinate.x, lastMove.newCoordinate.y] = null;
+            return;
+        }
+        table[pieceDestroyed.GetPosition().x, pieceDestroyed.GetPosition().y] = pieceDestroyed;
+    }
 }

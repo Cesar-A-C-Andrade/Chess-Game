@@ -7,7 +7,7 @@ public class SpecialMoveManager
         Coordinates lastCoordinate = lastMovement.lastCoordinate;
         Coordinates newCoordinate = lastMovement.newCoordinate;
         Coordinates enPassantCoordinate = new Coordinates(-1, -1);
-        if (!(lastMovement.piece is Pawn))
+        if (!(lastMovement.pieceMoved is Pawn))
         {
             return enPassantCoordinate;
         }
@@ -15,7 +15,7 @@ public class SpecialMoveManager
         {
             return enPassantCoordinate;
         }
-        int lastPawnDirection = lastMovement.piece.IsWhite() ? 1 : -1;
+        int lastPawnDirection = lastMovement.pieceMoved.IsWhite() ? 1 : -1;
 
         if (Mathf.Abs(lastCoordinate.x - newCoordinate.x) != 2)
         {
@@ -32,8 +32,21 @@ public class SpecialMoveManager
         return enPassantCoordinate;
     }
 
-    public void MakeEnPassant(Board board)
+    public Move MakeEnPassant(Pawn pawn, Move lastMovement, Board board)
     {
+        Coordinates enPassant = GetEnPassantCoordinate(lastMovement, pawn);
+        Coordinates lastPawnPosition = lastMovement.pieceMoved.GetPosition();
+        Move enPassantMove = new Move(pawn, lastMovement.pieceMoved, pawn.GetPosition(), enPassant);
+        board.MovePiece(pawn.GetPosition(), enPassant);
+        board.RemovePieceAt(lastPawnPosition);
+        return enPassantMove;
+    }
 
+    public bool IsSpecialMove(Piece piece, Move lastMovement, Coordinates to)
+    {
+        if (piece == null) return false;
+        if (!(piece is Pawn)) return false;
+        if (!(to.Equals(GetEnPassantCoordinate(lastMovement, piece as Pawn)))) return false;
+        return true;
     }
 }
