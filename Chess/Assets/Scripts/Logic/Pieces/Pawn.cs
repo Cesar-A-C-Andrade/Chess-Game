@@ -8,6 +8,12 @@ public class Pawn : Piece
     private int direction = 1; // 1 for white, -1 for black
     private bool isFirstMove = true;
 
+
+    public Pawn()
+    {
+        SetIsFirstMove(true);
+    }
+
     public Coordinates[] GenerateMoves(Board board)
     {
         List<Coordinates> coordinates = new List<Coordinates>();
@@ -74,6 +80,9 @@ public class Pawn : Piece
 
     public Piece DuplicatePiece()
     {
-        throw new System.NotImplementedException();
+        Piece piece = new Pawn();
+        piece.SetColor(isWhite);
+        piece.SetPosition(position);
+        return piece;
     }
 }

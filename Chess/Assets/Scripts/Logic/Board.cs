@@ -9,92 +9,53 @@ public class Board
     private Coordinates blackKingPosition;
     private Coordinates whiteKingPosition;
 
-    public Board()
+
+
+    public void StartBoard()
     {
         for (int i = 0; i < 8; i++)
         {
-            Coordinates whitePawnPosition = new Coordinates(1, i);
-            Coordinates blackPawnPosition = new Coordinates(6, i);
-            Pawn whitePaw = new Pawn();
-            Pawn blackPaw = new Pawn();
-            whitePaw.SetColor(true);
-            blackPaw.SetColor(false);
-            PlacePiece(whitePaw, whitePawnPosition);
-            PlacePiece(blackPaw, blackPawnPosition);
+            CreateAndPlacePiece("pawn", 1, i, true);
+            CreateAndPlacePiece("pawn", 6, i, false);
         }
 
+        CreateAndPlacePiece("horse", 0, 1, true);
+        CreateAndPlacePiece("horse", 0, 6, true);
+        CreateAndPlacePiece("horse", 7, 1, false);
+        CreateAndPlacePiece("horse", 7, 6, false);
 
-        Coordinates whiteHorse1 = new Coordinates(0, 1);
-        Coordinates whiteHorse2 = new Coordinates(0, 6);
-        Coordinates blackHorse1 = new Coordinates(7, 1);
-        Coordinates blackHorse2 = new Coordinates(7, 6);
-        Horse whiteHorseLeft = new Horse();
-        Horse blackHorseLeft = new Horse();
-        Horse whiteHorseRight = new Horse();
-        Horse blackHorseRight = new Horse();
-        whiteHorseLeft.SetColor(true);
-        whiteHorseRight.SetColor(true);
-        blackHorseLeft.SetColor(false);
-        blackHorseRight.SetColor(false);
-        PlacePiece(whiteHorseLeft, whiteHorse1);
-        PlacePiece(blackHorseLeft, blackHorse1);
-        PlacePiece(whiteHorseRight, whiteHorse2 );
-        PlacePiece(blackHorseRight, blackHorse2);
+        CreateAndPlacePiece("rook", 0, 0, true);
+        CreateAndPlacePiece("rook", 0, 7, true);
+        CreateAndPlacePiece("rook", 7, 0, false);
+        CreateAndPlacePiece("rook", 7, 7, false);
 
-        Coordinates whiteRook1 = new Coordinates(0, 0);
-        Coordinates whiteRook2 = new Coordinates(0, 7);
-        Coordinates blackRook1 = new Coordinates(7, 0);
-        Coordinates blackRook2 = new Coordinates(7, 7);
-        Rook whiteRookLeft = new Rook();
-        Rook blackRookLeft = new Rook();
-        Rook whiteRookRight = new Rook();
-        Rook blackRookRight = new Rook();
-        whiteRookLeft.SetColor(true);
-        whiteRookRight.SetColor(true);
-        blackRookLeft.SetColor(false);
-        blackRookRight.SetColor(false);
-        PlacePiece(whiteRookLeft, whiteRook1);
-        PlacePiece(blackRookLeft, blackRook1);
-        PlacePiece(whiteRookRight, whiteRook2);
-        PlacePiece(blackRookRight, blackRook2);
 
-        Coordinates bishopPos1 = new Coordinates(0, 2);
-        Coordinates bishopPos2 = new Coordinates(0, 5);
-        Coordinates bishopPos3 = new Coordinates(7, 2);
-        Coordinates bishopPos4 = new Coordinates(7, 5);
-        Bishop bishop1 = new Bishop();
-        Bishop bishop2 = new Bishop();
-        Bishop bishop3 = new Bishop();
-        Bishop bishop4 = new Bishop();
-        bishop1.SetColor(true);
-        bishop2.SetColor(true);
-        bishop3.SetColor(false);
-        bishop4.SetColor(false);
-        PlacePiece(bishop1, bishopPos1);
-        PlacePiece(bishop2, bishopPos2);
-        PlacePiece(bishop3, bishopPos3);
-        PlacePiece(bishop4, bishopPos4);
+        CreateAndPlacePiece("bishop", 0, 2, true);
+        CreateAndPlacePiece("bishop", 0, 5, true);
+        CreateAndPlacePiece("bishop", 7, 2, false);
+        CreateAndPlacePiece("bishop", 7, 5, false);
 
-        Coordinates kingPos1 = new Coordinates(0, 4);
-        Coordinates kingPos2 = new Coordinates(7, 4);
-        Coordinates queenPos1 = new Coordinates(0, 3);
-        Coordinates queenPos2 = new Coordinates(7, 3);
-        King king1 = new King();
-        King king2 = new King();
-        Queen queen1 = new Queen();
-        Queen queen2 = new Queen();
-        king1.SetColor(true);
-        king2.SetColor(false);
-        queen1.SetColor(true);
-        queen2.SetColor(false);
-        PlacePiece(king1, kingPos1);
-        PlacePiece(king2, kingPos2);
-        PlacePiece(queen1, queenPos1);
-        PlacePiece(queen2, queenPos2);
+        CreateAndPlacePiece("king", 0, 4, true);
+        CreateAndPlacePiece("king", 7, 4, false);
+        CreateAndPlacePiece("queen", 0, 3, true);
+        CreateAndPlacePiece("queen", 7, 3, false);
 
-        blackKingPosition = kingPos2;
-        whiteKingPosition = kingPos1;
+        whiteKingPosition = new Coordinates(0, 4);
+        blackKingPosition = new Coordinates(7, 4);
 
+    }
+
+    public void TestScenario()
+    {
+        CreateAndPlacePiece("rook", 7, 0, false);
+        CreateAndPlacePiece("rook", 7, 1, false);
+        CreateAndPlacePiece("rook", 1, 7, true);
+        CreateAndPlacePiece("king", 0,0, true);
+        CreateAndPlacePiece("king", 7, 4, false);
+
+
+        blackKingPosition = new Coordinates(7, 4);
+        whiteKingPosition = new Coordinates(0, 0);
     }
 
     public Piece GetPieceAt(Coordinates coordinates)
@@ -131,6 +92,10 @@ public class Board
             table[to.x, to.y] = pieceToMove;
             table[from.x, from.y] = null;
             pieceToMove.SetPosition(to);
+            if (pieceToMove is King)
+            {
+                SetKingPosition(pieceToMove.IsWhite(), to);
+            }
         }
     }
 
@@ -141,10 +106,17 @@ public class Board
         piece.SetPosition(coordinates);
     }
 
+    public void CreateAndPlacePiece(string pieceType, int xCoordinate, int yCoordinate, bool isPieceWhite)
+    {
+        Coordinates pieceCoordinate = new Coordinates(xCoordinate, yCoordinate);
+        PlacePiece(PieceFactory(pieceType, isPieceWhite), pieceCoordinate);
+    }
+
     public void RemovePieceAt(Coordinates from)
     {
         Piece removedPiece = GetPieceAt(from);
         removedPiece = null;
+        table[from.x, from.y] = null;
     }
 
     public void PrintBoard()
@@ -173,7 +145,18 @@ public class Board
         return isWhite ? whiteKingPosition : blackKingPosition;
     }
 
-    private bool IsValidCoordinate(Coordinates position)
+    public void SetKingPosition(bool isWhite, Coordinates newPos)
+    {
+        if (isWhite)
+        {
+            whiteKingPosition = newPos;
+            return;
+        }
+        blackKingPosition = newPos;
+        return;
+    }
+
+    public bool IsValidCoordinate(Coordinates position)
     {
         return position.x >= 0 && position.x < 8 && position.y >= 0 && position.y < 8;
     }
@@ -185,8 +168,13 @@ public class Board
         {
             for (int j = 0; j < 8; j++)
             {
-                Piece newPiece = table[i, j].DuplicatePiece();
-                board.PlacePiece(newPiece, new Coordinates(i, j));
+                if (table[i, j] != null)
+                {
+                    Piece newPiece = table[i, j].DuplicatePiece();
+                    board.PlacePiece(newPiece, new Coordinates(i, j));
+                }
+                
+                    
             }
         }
         board.blackKingPosition = new Coordinates(blackKingPosition.x, blackKingPosition.y);
@@ -203,4 +191,70 @@ public class Board
         }
         return GetPieceAt(position) == null;
     }
+
+    public Piece[] GetPiecesByColor(string color)
+    {
+        List<Piece> pieces = new List<Piece>();
+        switch (color.ToLower())
+        {
+            case "white":
+                for (int i = 0; i < 8; i++)
+                {
+                    for (int j = 0; j < 8; j++)
+                    {
+                        if(table[i, j] == null) { continue; }
+                        if(table[i, j].IsWhite())
+                        {
+                            pieces.Add(table[i, j]);
+                        }
+                    }
+                }
+                break;
+            case "black":
+                for (int i = 0; i < 8; i++)
+                {
+                    for (int j = 0; j < 8; j++)
+                    {
+                        if (!(table[i, j].IsWhite()))
+                        {
+                            pieces.Add(table[i, j]);
+                        }
+                    }
+                }
+                break;
+        }
+        return pieces.ToArray();
+    }
+
+    public Piece PieceFactory(string pieceType, bool pieceIsWhite)
+    {
+        Piece piece;
+        switch (pieceType)
+        {
+            case "pawn":
+                piece = new Pawn();
+                break;
+            case "rook":
+                piece = new Rook();
+                break;
+            case "queen":
+                piece = new Queen();
+                break;
+            case "king":
+                piece = new King();
+                break;
+            case "bishop":
+                piece = new Bishop();
+                break;
+            case "horse":
+                piece = new Horse();
+                break;
+            default:
+                piece = new Pawn();
+                break;
+        }
+        piece.SetColor(pieceIsWhite);
+        return piece;
+    }
+
 }

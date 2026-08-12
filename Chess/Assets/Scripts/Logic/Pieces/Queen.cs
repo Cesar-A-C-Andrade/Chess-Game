@@ -106,7 +106,11 @@ public class Queen : Piece
         List<Coordinates> moves = new List<Coordinates>();
         for (int i = 1; i < 8; i++)
         {
-            dir = dir * i;
+            dir = directions[direction] * i;
+            if (position.x + dir.x < 0 || position.y + dir.y < 0 || position.x + dir.x >= 8 || position.y + dir.y >= 8)
+            {
+                break;
+            }
             Coordinates move = new Coordinates((int)(position.x + dir.x), (int)(position.y + dir.y));
             if (position.x + dir.x >= 0 && position.y + dir.y >= 0 && position.x + dir.x < 8 && position.y + dir.y < 8)
             {

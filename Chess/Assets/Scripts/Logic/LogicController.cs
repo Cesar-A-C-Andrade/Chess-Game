@@ -17,23 +17,49 @@ public class LogicController : MonoBehaviour
 
     Board board;
     MoveValidator moveValidator = new MoveValidator();
+    GameStateManager stateManager = new GameStateManager();
+    XequeManager xequeManager = new XequeManager();
+    SpecialMoveManager specialMoveManager = new SpecialMoveManager();
+
 
     void Start()
     {
         board = new Board();
+        board.TestScenario();
         board.PrintBoard();
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        lastMovement = new Move(null, new Coordinates(-1,-1), new Coordinates(-1, -1));
+        stateManager.SaveState(granHoqueWhite, grandHoqueBlack, shortHoqueWhite, shortHoqueBlack, lastMovement, board.DuplicateBoard(), isWhiteTurn);
+        Debug.Log(xequeManager.IsXequeMate(stateManager.LoadLastState()));
     }
 
     void MovePiece(Coordinates from, Coordinates to)
     {
         board.MovePiece(from, to);
+        lastMovement = new Move(board.GetPieceAt(to), from, to);
+        stateManager.SaveState(granHoqueWhite, grandHoqueBlack, shortHoqueWhite, shortHoqueBlack, lastMovement, board.DuplicateBoard(), isWhiteTurn);
+    }
+
+    public void OnPieceSelected(Coordinates pieceLocation)
+    {
+        Piece piece = board.GetPieceAt(pieceLocation);
+        List<Coordinates> moves = new List<Coordinates>();
+        foreach (Coordinates move in moveValidator.ValidateMoves(piece, piece.GenerateMoves(board), stateManager.LoadLastState()))
+        {
+            moves.Add(move);
+        }
+        if(piece is Pawn)
+        {
+            moveValidator.ValidateMoves(piece, new Coordinates[] { specialMoveManager.GetEnPassantCoordinate(lastMovement, piece as Pawn) }, stateManager.LoadLastState() );
+        }
+
+
+        //Enviar as coordenadas para o board UI marcar as posições que o usuário pode clicar no board.
+
+    }
+
+    public void OnPieceMoved(Coordinates lastPieceLocation, Coordinates newPieceLocation)
+    {
+        MovePiece(lastPieceLocation, newPieceLocation);
     }
 
 }
@@ -43,31 +69,15 @@ public struct Move
     public Piece piece;
     public Coordinates lastCoordinate;
     public Coordinates newCoordinate;
-}
 
-public struct GameState
-{
-    public bool granHoqueWhite;
-    public bool grandHoqueBlack;
-    public bool shortHoqueWhite;
-    public bool shortHoqueBlack;
-    public bool isWhiteTurn;
-
-    public Move lastMovement;
-
-    public Board board;
-
-    public GameState(bool granHoqueWhite, bool grandHoqueBlack, bool shortHoqueWhite, bool shortHoqueBlack, Move lastMovement, Board board, bool isWhiteTurn)
+    public Move(Piece piece, Coordinates lastCoordinates, Coordinates newCoordinates)
     {
-        this.granHoqueWhite = granHoqueWhite;
-        this.grandHoqueBlack = grandHoqueBlack;
-        this.shortHoqueWhite = shortHoqueWhite;
-        this.shortHoqueBlack = shortHoqueBlack;
-        this.lastMovement = lastMovement;
-        this.board = board;
-        this.isWhiteTurn = isWhiteTurn;
+        this.piece = piece;
+        this.lastCoordinate = lastCoordinates; 
+        this.newCoordinate = newCoordinates;
     }
 }
+
 
 public struct Coordinates
 {
