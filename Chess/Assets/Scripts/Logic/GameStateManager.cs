@@ -5,9 +5,9 @@ public class GameStateManager
 
     private GameState lastState;
 
-    public void SaveState(bool granHoqueWhite, bool grandHoqueBlack, bool shortHoqueWhite, bool shortHoqueBlack, Move lastMovement, Board board, bool isWhiteTurn)
+    public void SaveState(Move lastMovement, Board board, bool isWhiteTurn)
     {
-        lastState = new GameState(granHoqueWhite, grandHoqueBlack, shortHoqueWhite, shortHoqueBlack, lastMovement, board, isWhiteTurn);
+        lastState = new GameState(lastMovement, board, isWhiteTurn);
     }
 
     public GameState LoadLastState()
@@ -17,29 +17,22 @@ public class GameStateManager
 
     public void PrintState()
     {
-        Debug.Log($"GranHoqueWhite {lastState.granHoqueWhite}, GranHoqueBlack {lastState.grandHoqueBlack}, ShortHoqueWhite {lastState.shortHoqueWhite}, ShortHoqueBlack {lastState.shortHoqueBlack}, Turn {lastState.isWhiteTurn}");
+        Debug.Log($"Turn {lastState.isWhiteTurn}");
+        lastState.lastMovement.PrintMovement();
     }
     
 }
 
 public struct GameState
 {
-    public bool granHoqueWhite;
-    public bool grandHoqueBlack;
-    public bool shortHoqueWhite;
-    public bool shortHoqueBlack;
     public bool isWhiteTurn;
 
     public Move lastMovement;
 
     public Board board;
 
-    public GameState(bool granHoqueWhite, bool grandHoqueBlack, bool shortHoqueWhite, bool shortHoqueBlack, Move lastMovement, Board board, bool isWhiteTurn)
+    public GameState(Move lastMovement, Board board, bool isWhiteTurn)
     {
-        this.granHoqueWhite = granHoqueWhite;
-        this.grandHoqueBlack = grandHoqueBlack;
-        this.shortHoqueWhite = shortHoqueWhite;
-        this.shortHoqueBlack = shortHoqueBlack;
         this.lastMovement = lastMovement;
         this.board = board;
         this.isWhiteTurn = isWhiteTurn;

@@ -9,16 +9,11 @@ public class LogicController : MonoBehaviour
 
     [SerializeField]
     InputField inputField;
-    [SerializeField]
-    InputField inputField2;
-
-    private bool granHoqueWhite = true;
-    private bool grandHoqueBlack = true;
-    private bool shortHoqueWhite = true;
-    private bool shortHoqueBlack = true;
 
     private Move lastMovement;
     private bool isWhiteTurn = true;
+    private Piece pieceSelected = null;
+    private Coordinates[] validMovesForPieceSelected = null;
 
 
     Board board;
@@ -32,22 +27,30 @@ public class LogicController : MonoBehaviour
     {
         board = new Board();
         board.StartBoard();
+        //board.TestScenario();
         board.PrintBoard();
-        lastMovement = new Move(null, null, new Coordinates(-1,-1), new Coordinates(-1, -1));
-        stateManager.SaveState(granHoqueWhite, grandHoqueBlack, shortHoqueWhite, shortHoqueBlack, lastMovement, board.DuplicateBoard(), isWhiteTurn);
+        lastMovement = new Move(null, null, new Coordinates(-1,-1), new Coordinates(-1, -1), false, false);
+        stateManager.SaveState(lastMovement, board.DuplicateBoard(), isWhiteTurn);
     }
 
-    void MovePiece(Coordinates from, Coordinates to)
+    void MovePiece(Coordinates to)
     {
-        if(specialMoveManager.IsSpecialMove(board.GetPieceAt(from), lastMovement, to))
+        if (specialMoveManager.IsSpecialMove(pieceSelected, stateManager.LoadLastState(), to))
         {
-            lastMovement = specialMoveManager.MakeEnPassant(board.GetPieceAt(from) as Pawn, lastMovement, board);
-            stateManager.SaveState(granHoqueWhite, grandHoqueBlack, shortHoqueWhite, shortHoqueBlack, lastMovement, board.DuplicateBoard(), isWhiteTurn);
+            lastMovement = specialMoveManager.MakeSpecialMove(pieceSelected, lastMovement, board, to);
+            ChangeTurn();
             return;
         }
-        lastMovement = board.MovePiece(from, to);
+        lastMovement = board.MovePiece(pieceSelected.GetPosition(), to);
+        ChangeTurn();
+    }
+
+    void ChangeTurn()
+    {
         isWhiteTurn = !isWhiteTurn;
-        stateManager.SaveState(granHoqueWhite, grandHoqueBlack, shortHoqueWhite, shortHoqueBlack, lastMovement, board.DuplicateBoard(), isWhiteTurn);
+        pieceSelected = null;
+        validMovesForPieceSelected = null;
+        stateManager.SaveState(lastMovement, board.DuplicateBoard(), isWhiteTurn);
         board.PrintBoard();
     }
 
@@ -55,35 +58,47 @@ public class LogicController : MonoBehaviour
     {
         Piece piece = board.GetPieceAt(pieceLocation);
 
+        if (piece.IsWhite() != isWhiteTurn)
+        {
+            Debug.Log("Not your turn");
+            return;
+        }
+
         List<Coordinates> moves = new List<Coordinates>();
         foreach (Coordinates move in moveValidator.ValidateMoves(piece, piece.GenerateMoves(board), stateManager.LoadLastState()))
         {
             moves.Add(move);
         }
-        if(piece is Pawn)
+        Coordinates[] specialMoves = specialMoveManager.GetSpecialMoveCoordinates(stateManager.LoadLastState(), piece);
+        foreach (Coordinates move in moveValidator.ValidateMoves(piece, specialMoves, stateManager.LoadLastState()))
         {
-            Coordinates[] enPassant = new Coordinates[] { specialMoveManager.GetEnPassantCoordinate(lastMovement, piece as Pawn) };
-            foreach (Coordinates move in moveValidator.ValidateMoves(piece, enPassant, stateManager.LoadLastState()))
-            {
-                moves.Add(move);
-            }
+            moves.Add(move);
         }
         Debug.Log("This is your moves");
         foreach (Coordinates move in moves)
         {
             move.PrintCoordinates();
         }
-
-
+        pieceSelected = piece;
+        validMovesForPieceSelected = moves.ToArray();
 
         //Enviar as coordenadas para o board UI marcar as posições que o usuário pode clicar no board.
 
     }
 
-    public void OnPieceMoved(Coordinates lastPieceLocation, Coordinates newPieceLocation)
+    public bool IsValidMoveForSelectedPiece(Coordinates move)
     {
-        MovePiece(lastPieceLocation, newPieceLocation);
-        lastMovement.PrintMovement();
+        foreach (Coordinates validMove in validMovesForPieceSelected)
+        {
+            if (validMove.Equals(move)) return true;
+        }
+        return false;
+    }
+
+    public void OnPieceMoved(Coordinates newPieceLocation)
+    {
+        if (!(IsValidMoveForSelectedPiece(newPieceLocation))) { Debug.Log("Movimento invalido, tente outro por favor"); return; }
+        MovePiece(newPieceLocation);
         stateManager.PrintState();
     }
 
@@ -95,14 +110,26 @@ public class LogicController : MonoBehaviour
     public void TestButtonPressed()
     {
         Coordinates coordinates = new Coordinates(int.Parse(inputField.text[0].ToString()), int.Parse(inputField.text[1].ToString()));
-        OnPieceSelected(coordinates);
+        OnHousePressed(coordinates);
     }
-
-    public void TestButtonPressed2()
+     
+    public void OnHousePressed(Coordinates house)
     {
-        Coordinates coordinates = new Coordinates(int.Parse(inputField.text[0].ToString()), int.Parse(inputField.text[1].ToString()));
-        Coordinates coordinates2 = new Coordinates(int.Parse(inputField2.text[0].ToString()), int.Parse(inputField2.text[1].ToString()));
-        OnPieceMoved(coordinates, coordinates2);
+        if(pieceSelected != null)
+        {
+            if(board.GetPieceAt(house) != null && board.GetPieceAt(house).IsWhite() == pieceSelected.IsWhite())
+            {
+                OnPieceSelected(house);
+                return;
+            }
+            OnPieceMoved(house);
+            return;
+        }
+        if(board.GetPieceAt(house) != null)
+        {
+            OnPieceSelected(house);
+            return;
+        }
     }
 
 }
@@ -113,17 +140,31 @@ public struct Move
     public Piece pieceDestroyed;
     public Coordinates lastCoordinate;
     public Coordinates newCoordinate;
+    public bool isShortHoque;
+    public bool isGrandHoque;
 
-    public Move(Piece piece, Piece destroyed, Coordinates lastCoordinates, Coordinates newCoordinates)
+    public Move(Piece piece, Piece destroyed, Coordinates lastCoordinates, Coordinates newCoordinates, bool isShortHoque, bool isGrandHoque)
     {
         this.pieceMoved = piece;
         this.lastCoordinate = lastCoordinates; 
         this.newCoordinate = newCoordinates;
         this.pieceDestroyed = destroyed;
+        this.isShortHoque = isShortHoque;
+        this.isGrandHoque = isGrandHoque;
     }
 
     public void PrintMovement()
     {
+        if (this.isShortHoque)
+        {
+            Debug.Log("O-O");
+            return;
+        }
+        if (this.isGrandHoque)
+        {
+            Debug.Log("O-O-O"); 
+            return;
+        }
         Debug.Log("Piece moved: " + pieceMoved.GetType().Name);
         if(pieceDestroyed != null)
         {
@@ -157,4 +198,10 @@ public struct Coordinates
     {
         Debug.Log($"X: {this.x} and Y: {this.y}");
     }
+
+    public bool IsEmpty() 
+    {
+        return this.x == -1 || this.y == -1;
+    }
+
 }

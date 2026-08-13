@@ -35,27 +35,28 @@ public class Board
         CreateAndPlacePiece("bishop", 7, 2, false);
         CreateAndPlacePiece("bishop", 7, 5, false);
 
-        CreateAndPlacePiece("king", 0, 4, true);
-        CreateAndPlacePiece("king", 7, 4, false);
-        CreateAndPlacePiece("queen", 0, 3, true);
-        CreateAndPlacePiece("queen", 7, 3, false);
+        CreateAndPlacePiece("king", 0, 3, true);
+        CreateAndPlacePiece("king", 7, 3, false);
+        CreateAndPlacePiece("queen", 0, 4, true);
+        CreateAndPlacePiece("queen", 7, 4, false);
 
-        whiteKingPosition = new Coordinates(0, 4);
-        blackKingPosition = new Coordinates(7, 4);
+        whiteKingPosition = new Coordinates(0, 3);
+        blackKingPosition = new Coordinates(7, 3);
 
     }
 
     public void TestScenario()
     {
         CreateAndPlacePiece("rook", 7, 0, false);
-        CreateAndPlacePiece("rook", 7, 1, false);
-        CreateAndPlacePiece("rook", 1, 7, true);
-        CreateAndPlacePiece("king", 0,0, true);
-        CreateAndPlacePiece("king", 7, 4, false);
+        CreateAndPlacePiece("rook", 7, 7, false);
+        CreateAndPlacePiece("rook", 0, 7, true);
+        CreateAndPlacePiece("rook", 0, 0, true);
+        CreateAndPlacePiece("king", 0,3, true);
+        CreateAndPlacePiece("king", 7, 3, false);
 
 
-        blackKingPosition = new Coordinates(7, 4);
-        whiteKingPosition = new Coordinates(0, 0);
+        blackKingPosition = new Coordinates(7, 3);
+        whiteKingPosition = new Coordinates(0, 3);
     }
 
     public Piece GetPieceAt(Coordinates coordinates)
@@ -97,9 +98,9 @@ public class Board
             {
                 SetKingPosition(pieceToMove.IsWhite(), to);
             }
-            return new Move(pieceToMove, pieceInLocation, from, to);
+            return new Move(pieceToMove, pieceInLocation, from, to, false, false);
         }
-        return new Move(null, null, from, to);
+        return new Move(null, null, from, to, false, false);
     }
 
     public void PlacePiece(Piece piece, Coordinates coordinates)
