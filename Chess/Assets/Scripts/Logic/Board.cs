@@ -263,7 +263,7 @@ public class Board
 
     public void UndoMove(Move lastMove)
     {
-        Piece pieceDestroyed = lastMove.pieceDestroyed;
+        Piece pieceDestroyed = lastMove.secondPieceMoved;
         Piece pieceMoved = lastMove.pieceMoved;
         MovePiece(lastMove.newCoordinate, lastMove.lastCoordinate);
         if (pieceDestroyed == null)

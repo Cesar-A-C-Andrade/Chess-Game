@@ -137,7 +137,7 @@ public class LogicController : MonoBehaviour
 public struct Move
 {
     public Piece pieceMoved;
-    public Piece pieceDestroyed;
+    public Piece secondPieceMoved;
     public Coordinates lastCoordinate;
     public Coordinates newCoordinate;
     public bool isShortHoque;
@@ -148,7 +148,7 @@ public struct Move
         this.pieceMoved = piece;
         this.lastCoordinate = lastCoordinates; 
         this.newCoordinate = newCoordinates;
-        this.pieceDestroyed = destroyed;
+        this.secondPieceMoved = destroyed;
         this.isShortHoque = isShortHoque;
         this.isGrandHoque = isGrandHoque;
     }
@@ -166,9 +166,9 @@ public struct Move
             return;
         }
         Debug.Log("Piece moved: " + pieceMoved.GetType().Name);
-        if(pieceDestroyed != null)
+        if(secondPieceMoved != null)
         {
-            Debug.Log($"Piece destroyed {pieceDestroyed.GetType().Name}");
+            Debug.Log($"Second Piece Moved {secondPieceMoved.GetType().Name}");
         }
         this.lastCoordinate.PrintCoordinates();
         this.newCoordinate.PrintCoordinates();
