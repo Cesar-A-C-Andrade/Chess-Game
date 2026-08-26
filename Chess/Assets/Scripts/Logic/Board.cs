@@ -9,10 +9,11 @@ public class Board
     private Coordinates blackKingPosition;
     private Coordinates whiteKingPosition;
 
-
+    Event<OnTableChangedEvent> onTableChangedEvent = new Event<OnTableChangedEvent>();
 
     public void StartBoard()
     {
+        EventBus.instance.AddBroadCaster(onTableChangedEvent);
         for (int i = 0; i < 8; i++)
         {
             CreateAndPlacePiece("pawn", 1, i, true);
@@ -42,7 +43,7 @@ public class Board
 
         whiteKingPosition = new Coordinates(0, 3);
         blackKingPosition = new Coordinates(7, 3);
-
+        EventBus.instance.Invoke<OnTableChangedEvent>(new OnTableChangedEvent(ConvertBoardIntoStringData(), ConvertBoardIntoColorsData()));
     }
 
     public void TestScenario()
@@ -98,6 +99,7 @@ public class Board
             {
                 SetKingPosition(pieceToMove.IsWhite(), to);
             }
+        
             return new Move(pieceToMove, pieceInLocation, from, to, false, false);
         }
         return new Move(null, null, from, to, false, false);
@@ -273,4 +275,53 @@ public class Board
         }
         table[pieceDestroyed.GetPosition().x, pieceDestroyed.GetPosition().y] = pieceDestroyed;
     }
+
+    public string[,] ConvertBoardIntoStringData()
+    {
+        string[,] _data = new string[8, 8];
+
+        for (int x = 0; x < 8; x++)
+        {
+            for (int y = 0; y < 8; y++)
+            {
+                Piece piece = table[x, y];
+                if (piece != null)
+                {
+                    _data[x,y] = piece.GetType().Name[0].ToString();
+                }
+                else
+                {
+                    _data[x, y] += "";
+                }
+            }
+        }
+
+
+        return _data;
+    }
+
+    public bool[,] ConvertBoardIntoColorsData()
+    {
+        bool[,] _data = new bool[8, 8];
+
+        for (int x = 0; x < 8; x++)
+        {
+            for (int y = 0; y < 8; y++)
+            {
+                Piece piece = table[x, y];
+                if (piece != null)
+                {
+                    _data[x, y] = piece.IsWhite();
+                }
+                else
+                {
+                    _data[x, y] = false;
+                }
+            }
+        }
+
+
+        return _data;
+    }
+
 }

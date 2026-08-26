@@ -92,16 +92,19 @@ public class SpecialMoveManager
                 return true;
             }
         }
-        return true;
+        return false;
     }
 
     public Move MakeSpecialMove(Piece piece, Move lastMovement, Board board, Coordinates targetPosition)
     {
         Move move;
-        if (targetPosition.Equals(GetEnPassantCoordinate(lastMovement, piece as Pawn)))
+        if (piece is Pawn) 
         {
-            move = MakeEnPassant(piece as Pawn, lastMovement, board);
-            return move;
+            if (targetPosition.Equals(GetEnPassantCoordinate(lastMovement, piece as Pawn)))
+            {
+                move = MakeEnPassant(piece as Pawn, lastMovement, board);
+                return move;
+            }
         }
         if (targetPosition.Equals(GetGrandHoqueCoordinates(piece.IsWhite(), board)))
         {
@@ -156,6 +159,10 @@ public class SpecialMoveManager
         {
             if (detector.IsHouseUnderAttack(board, house, isWhite)) { return false; }
         }
+        foreach (Coordinates house in shortHoqueCoordinates[isWhite])
+        {
+            if (board.GetPieceAt(house) != null ) { return false; }
+        }
         return true;
     }
 
@@ -166,6 +173,10 @@ public class SpecialMoveManager
         foreach (Coordinates house in grandHoqueCoordinates[isWhite])
         {
             if (detector.IsHouseUnderAttack(board, house, isWhite)) { return false;}
+        }
+        foreach (Coordinates house in grandHoqueCoordinates[isWhite])
+        {
+            if (board.GetPieceAt(house) != null) { return false; }
         }
         return true;
     }

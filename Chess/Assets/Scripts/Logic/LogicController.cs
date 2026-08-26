@@ -25,6 +25,7 @@ public class LogicController : MonoBehaviour
 
     void Start()
     {
+        EventBus.instance.Subscribe<OnHouseSelectedEvent>(HandleHouseSelectedEvent);
         board = new Board();
         board.StartBoard();
         //board.TestScenario();
@@ -74,11 +75,7 @@ public class LogicController : MonoBehaviour
         {
             moves.Add(move);
         }
-        Debug.Log("This is your moves");
-        foreach (Coordinates move in moves)
-        {
-            move.PrintCoordinates();
-        }
+        EventBus.instance.Invoke<OnPieceSelectedEvent>(new OnPieceSelectedEvent(moves.ToArray()));
         pieceSelected = piece;
         validMovesForPieceSelected = moves.ToArray();
 
@@ -99,6 +96,7 @@ public class LogicController : MonoBehaviour
     {
         if (!(IsValidMoveForSelectedPiece(newPieceLocation))) { Debug.Log("Movimento invalido, tente outro por favor"); return; }
         MovePiece(newPieceLocation);
+        EventBus.instance.Invoke<OnTableChangedEvent>(new OnTableChangedEvent(board.ConvertBoardIntoStringData(), board.ConvertBoardIntoColorsData()));
         stateManager.PrintState();
     }
 
@@ -130,6 +128,11 @@ public class LogicController : MonoBehaviour
             OnPieceSelected(house);
             return;
         }
+    }
+
+    void HandleHouseSelectedEvent(OnHouseSelectedEvent _event)
+    {
+        OnHousePressed(_event.houseSelectedCoordinates);
     }
 
 }
