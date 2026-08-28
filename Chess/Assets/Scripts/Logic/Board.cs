@@ -221,6 +221,7 @@ public class Board
                 {
                     for (int j = 0; j < 8; j++)
                     {
+                        if (table[i, j] == null) { continue; }
                         if (!(table[i, j].IsWhite()))
                         {
                             pieces.Add(table[i, j]);

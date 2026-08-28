@@ -6,10 +6,8 @@ public class XequeManager
 
     private AttackDetector detector = new AttackDetector();
     private SpecialMoveManager specialMoveManager = new SpecialMoveManager();
-    public bool XequeChecker(GameState currentState)
+    public bool XequeChecker(Board board, bool isWhiteTurn)
     {
-        Board board = currentState.board;
-        bool isWhiteTurn = currentState.isWhiteTurn;
 
         if (detector.IsHouseUnderAttack(board, board.GetKingPosition(isWhiteTurn), isWhiteTurn))
         {
@@ -20,10 +18,8 @@ public class XequeManager
     }
 
 
-    public bool IsXequeMate(GameState currentState)
+    public bool IsXequeMate(Board board, bool isWhiteTurn, Move lastMovement)
     {
-        Board board = currentState.board;
-        bool isWhiteTurn = currentState.isWhiteTurn;
         Move possibleMove;
         Piece[] pieces = isWhiteTurn ? board.GetPiecesByColor("White") : board.GetPiecesByColor("Black");
         foreach (Piece piece in pieces)
@@ -32,8 +28,7 @@ public class XequeManager
             foreach (Coordinates move in piece.GenerateMoves(board))
             {
                 possibleMove = board.MovePiece(piecePosition, move);
-                currentState.board = board;
-                if (!(XequeChecker(currentState)))
+                if (!(XequeChecker(board, isWhiteTurn)))
                 {
                     return false;
                 }
@@ -42,12 +37,11 @@ public class XequeManager
             //Test En Passant
             if (piece is Pawn)
             {
-                Coordinates enPassant = specialMoveManager.GetEnPassantCoordinate(currentState.lastMovement, piece as Pawn);
+                Coordinates enPassant = specialMoveManager.GetEnPassantCoordinate(lastMovement, piece as Pawn);
                 if (enPassant.x != -1)
                 {
-                    possibleMove = specialMoveManager.MakeEnPassant(piece as Pawn, currentState.lastMovement, board);
-                    currentState.board = board;
-                    if (!(XequeChecker(currentState)))
+                    possibleMove = specialMoveManager.MakeEnPassant(piece as Pawn, lastMovement, board);
+                    if (!(XequeChecker(board, isWhiteTurn)))
                     {
                         return false;
                     }

@@ -14,7 +14,7 @@ public class LogicController : MonoBehaviour
     private bool isWhiteTurn = true;
     private Piece pieceSelected = null;
     private Coordinates[] validMovesForPieceSelected = null;
-
+    private bool resetGame = false;
 
     Board board;
     MoveValidator moveValidator = new MoveValidator();
@@ -26,12 +26,20 @@ public class LogicController : MonoBehaviour
     void Start()
     {
         EventBus.instance.Subscribe<OnHouseSelectedEvent>(HandleHouseSelectedEvent);
+        StartGame();
+    }
+
+    void StartGame()
+    {
+        resetGame = false;
         board = new Board();
         board.StartBoard();
-        //board.TestScenario();
-        board.PrintBoard();
-        lastMovement = new Move(null, null, new Coordinates(-1,-1), new Coordinates(-1, -1), false, false);
+        isWhiteTurn = true;
+        pieceSelected = null;
+        validMovesForPieceSelected = null;
+        lastMovement = new Move(null, null, new Coordinates(-1, -1), new Coordinates(-1, -1), false, false);
         stateManager.SaveState(lastMovement, board.DuplicateBoard(), isWhiteTurn);
+
     }
 
     void MovePiece(Coordinates to)
@@ -52,13 +60,21 @@ public class LogicController : MonoBehaviour
         pieceSelected = null;
         validMovesForPieceSelected = null;
         stateManager.SaveState(lastMovement, board.DuplicateBoard(), isWhiteTurn);
-        board.PrintBoard();
+        if (xequeManager.XequeChecker(board.DuplicateBoard(), isWhiteTurn))
+        {
+            if (xequeManager.IsXequeMate(board.DuplicateBoard(), isWhiteTurn, lastMovement))
+            {
+                Debug.Log("Perdeu otario");
+                resetGame = true;
+            }
+            Debug.Log("Check");
+        }
     }
 
     public void OnPieceSelected(Coordinates pieceLocation)
     {
+        stateManager.SaveState(lastMovement, board.DuplicateBoard(), isWhiteTurn);
         Piece piece = board.GetPieceAt(pieceLocation);
-
         if (piece.IsWhite() != isWhiteTurn)
         {
             Debug.Log("Not your turn");
@@ -78,7 +94,6 @@ public class LogicController : MonoBehaviour
         EventBus.instance.Invoke<OnPieceSelectedEvent>(new OnPieceSelectedEvent(moves.ToArray()));
         pieceSelected = piece;
         validMovesForPieceSelected = moves.ToArray();
-
         //Enviar as coordenadas para o board UI marcar as posições que o usuário pode clicar no board.
 
     }
@@ -96,8 +111,8 @@ public class LogicController : MonoBehaviour
     {
         if (!(IsValidMoveForSelectedPiece(newPieceLocation))) { Debug.Log("Movimento invalido, tente outro por favor"); return; }
         MovePiece(newPieceLocation);
+        if (resetGame) { StartGame(); return; }
         EventBus.instance.Invoke<OnTableChangedEvent>(new OnTableChangedEvent(board.ConvertBoardIntoStringData(), board.ConvertBoardIntoColorsData()));
-        stateManager.PrintState();
     }
 
     public Move GetLastMove()

@@ -28,6 +28,8 @@ public class MoveValidator
 
     public Coordinates ValidateMove(Piece piece, Coordinates move, GameState currentState)
     {
+        Debug.Log("Move valideting move: ");
+        move.PrintCoordinates();
         Board board = currentState.board;
         bool isWhiteTurn = currentState.isWhiteTurn;
         Coordinates piecePosition = piece.GetPosition();

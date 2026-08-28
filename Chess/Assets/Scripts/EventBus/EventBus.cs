@@ -56,6 +56,5 @@ public class EventBus : MonoBehaviour
         Event<T> _event = (Event<T>)broadCasters[type];
         _event.Invoke(data);
         lastBroadCastersData[type] = data;
-        Debug.Log(lastBroadCastersData[type]);
     }
 }
