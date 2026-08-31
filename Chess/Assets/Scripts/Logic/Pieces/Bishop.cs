@@ -14,8 +14,8 @@ public class Bishop : Piece
 
 
     private bool isWhite;
-    public Coordinates position;
-    public bool CanAttack(Coordinates target)
+    public BoardPosition position;
+    public bool CanAttack(BoardPosition target)
     {
         if (target.x - target.y == position.x - position.y || target.x + target.y == position.x + position.y)
         {
@@ -25,22 +25,22 @@ public class Bishop : Piece
     }
 
 
-    public Coordinates[] GenerateMoves(Board board)
+    public BoardPosition[] GenerateMoves(Board board)
     {
-        List<Coordinates> moves = new List<Coordinates>();
-        foreach (Coordinates move in GetMovesInDirection("diagUpLeft", board))
+        List<BoardPosition> moves = new List<BoardPosition>();
+        foreach (BoardPosition move in GetMovesInDirection("diagUpLeft", board))
         {
             moves.Add(move);
         }
-        foreach (Coordinates move in GetMovesInDirection("diagUpRight", board))
+        foreach (BoardPosition move in GetMovesInDirection("diagUpRight", board))
         {
             moves.Add(move);
         }
-        foreach (Coordinates move in GetMovesInDirection("diagDownLeft", board))
+        foreach (BoardPosition move in GetMovesInDirection("diagDownLeft", board))
         {
             moves.Add(move);
         }
-        foreach (Coordinates move in GetMovesInDirection("diagDownRight", board))
+        foreach (BoardPosition move in GetMovesInDirection("diagDownRight", board))
         {
             moves.Add(move);
         }
@@ -52,7 +52,7 @@ public class Bishop : Piece
         return isWhite;
     }
 
-    public Coordinates GetPosition()
+    public BoardPosition GetPosition()
     {
         return position;
     }
@@ -62,7 +62,7 @@ public class Bishop : Piece
         this.isWhite = isWhite;
     }
 
-    public void SetPosition(Coordinates position)
+    public void SetPosition(BoardPosition position)
     {
         this.position = position;
     }
@@ -75,11 +75,11 @@ public class Bishop : Piece
         return piece;
     }
 
-    private Coordinates[] GetMovesInDirection(String direction, Board board)
+    private BoardPosition[] GetMovesInDirection(String direction, Board board)
     {
         Piece piece = null;
         Vector2 dir = directions[direction];
-        List<Coordinates> moves = new List<Coordinates>();
+        List<BoardPosition> moves = new List<BoardPosition>();
         for (int i = 1; i < 8; i++)
         {
             dir = directions[direction] * i;
@@ -87,7 +87,7 @@ public class Bishop : Piece
             {
                 break;
             }
-            Coordinates move = new Coordinates((int)(position.x + dir.x), (int)(position.y + dir.y));
+            BoardPosition move = new BoardPosition((int)(position.x + dir.x), (int)(position.y + dir.y));
             if (position.x + dir.x >= 0 && position.y + dir.y >= 0 && position.x + dir.x < 8 && position.y + dir.y < 8)
             {
                 piece = board.GetPieceAt(move);

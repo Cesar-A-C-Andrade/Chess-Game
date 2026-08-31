@@ -4,17 +4,17 @@ using UnityEngine;
 public class Pawn : Piece
 {
     public bool isWhite;
-    public Coordinates position;
+    public BoardPosition position;
     private int direction = 1; // 1 for white, -1 for black
 
 
-    public Coordinates[] GenerateMoves(Board board)
+    public BoardPosition[] GenerateMoves(Board board)
     {
-        List<Coordinates> coordinates = new List<Coordinates>();
-        Coordinates frontMove = new Coordinates(position.x + 1 * direction, position.y);
-        Coordinates frontDoubleMove = new Coordinates(position.x + 2 * direction, position.y);
-        Coordinates frontLeftMove = new Coordinates(position.x + 1 * direction, position.y - 1);
-        Coordinates frontRightMove = new Coordinates(position.x + 1 * direction, position.y + 1);
+        List<BoardPosition> coordinates = new List<BoardPosition>();
+        BoardPosition frontMove = new BoardPosition(position.x + 1 * direction, position.y);
+        BoardPosition frontDoubleMove = new BoardPosition(position.x + 2 * direction, position.y);
+        BoardPosition frontLeftMove = new BoardPosition(position.x + 1 * direction, position.y - 1);
+        BoardPosition frontRightMove = new BoardPosition(position.x + 1 * direction, position.y + 1);
         if (board.IsEmptyHouse(frontMove))
         {
             coordinates.Add(frontMove);
@@ -36,7 +36,7 @@ public class Pawn : Piece
         return coordinates.ToArray();
     }
 
-    public Coordinates GetPosition()
+    public BoardPosition GetPosition()
     {
         return position;
     }
@@ -52,12 +52,12 @@ public class Pawn : Piece
         return isWhite;
     }
 
-    public bool CanAttack(Coordinates target)
+    public bool CanAttack(BoardPosition target)
     {
         return (target.y == position.y - 1 || target.y == position.y + 1) && target.x == position.x + 1 * direction;
     }
 
-    public void SetPosition(Coordinates position)
+    public void SetPosition(BoardPosition position)
     {
         this.position = position;
     }

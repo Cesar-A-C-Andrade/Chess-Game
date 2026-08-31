@@ -5,21 +5,21 @@ using UnityEngine;
 public class Horse : Piece
 {
     private bool isWhite;
-    public Coordinates position;
+    public BoardPosition position;
 
-    public bool CanAttack(Coordinates target)
+    public bool CanAttack(BoardPosition target)
     {
-        Coordinates[] moves = new Coordinates[8];
-        moves[0] = new Coordinates(position.x + 2, position.y + 1);
-        moves[1] = new Coordinates(position.x + 2, position.y - 1);
-        moves[2] = new Coordinates(position.x - 2, position.y + 1);
-        moves[3] = new Coordinates(position.x - 2, position.y - 1);
-        moves[4] = new Coordinates(position.x + 1, position.y + 2);
-        moves[5] = new Coordinates(position.x + 1, position.y - 2);
-        moves[6] = new Coordinates(position.x - 1, position.y + 2);
-        moves[7] = new Coordinates(position.x - 1, position.y - 2);
+        BoardPosition[] moves = new BoardPosition[8];
+        moves[0] = new BoardPosition(position.x + 2, position.y + 1);
+        moves[1] = new BoardPosition(position.x + 2, position.y - 1);
+        moves[2] = new BoardPosition(position.x - 2, position.y + 1);
+        moves[3] = new BoardPosition(position.x - 2, position.y - 1);
+        moves[4] = new BoardPosition(position.x + 1, position.y + 2);
+        moves[5] = new BoardPosition(position.x + 1, position.y - 2);
+        moves[6] = new BoardPosition(position.x - 1, position.y + 2);
+        moves[7] = new BoardPosition(position.x - 1, position.y - 2);
 
-        foreach (Coordinates move in moves)
+        foreach (BoardPosition move in moves)
         {
             if(move.x == target.x && move.y == target.y)
             {
@@ -30,21 +30,21 @@ public class Horse : Piece
     }
 
 
-    public Coordinates[] GenerateMoves(Board board)
+    public BoardPosition[] GenerateMoves(Board board)
     {
-        Coordinates[] moves = new Coordinates[8];
-        moves[0] = new Coordinates(position.x + 2, position.y + 1);
-        moves[1] = new Coordinates(position.x + 2, position.y - 1);
-        moves[2] = new Coordinates(position.x - 2, position.y + 1);
-        moves[3] = new Coordinates(position.x - 2, position.y - 1);
-        moves[4] = new Coordinates(position.x + 1, position.y + 2);
-        moves[5] = new Coordinates(position.x + 1, position.y - 2);
-        moves[6] = new Coordinates(position.x - 1, position.y + 2);
-        moves[7] = new Coordinates(position.x - 1, position.y - 2);
-        List<Coordinates> validMoves = new List<Coordinates>();
+        BoardPosition[] moves = new BoardPosition[8];
+        moves[0] = new BoardPosition(position.x + 2, position.y + 1);
+        moves[1] = new BoardPosition(position.x + 2, position.y - 1);
+        moves[2] = new BoardPosition(position.x - 2, position.y + 1);
+        moves[3] = new BoardPosition(position.x - 2, position.y - 1);
+        moves[4] = new BoardPosition(position.x + 1, position.y + 2);
+        moves[5] = new BoardPosition(position.x + 1, position.y - 2);
+        moves[6] = new BoardPosition(position.x - 1, position.y + 2);
+        moves[7] = new BoardPosition(position.x - 1, position.y - 2);
+        List<BoardPosition> validMoves = new List<BoardPosition>();
 
 
-        foreach (Coordinates move in moves)
+        foreach (BoardPosition move in moves)
         {
             if (board.IsEmptyHouse(move))
             {
@@ -63,7 +63,7 @@ public class Horse : Piece
         return isWhite;
     }
 
-    public Coordinates GetPosition()
+    public BoardPosition GetPosition()
     {
         return position;
     }
@@ -73,7 +73,7 @@ public class Horse : Piece
         this.isWhite = isWhite;
     }
 
-    public void SetPosition(Coordinates position)
+    public void SetPosition(BoardPosition position)
     {
         this.position = position;
     }

@@ -15,7 +15,7 @@ public class AttackDetector
         { "diagDownLeft", new Vector2(-1, -1) },
         { "diagDownRight", new Vector2(1, -1) }
     };
-    public bool IsHouseUnderAttack(Board board, Coordinates house, bool isWhiteTurn)
+    public bool IsHouseUnderAttack(Board board, BoardPosition house, bool isWhiteTurn)
     {
         if (CheckIfAnyPieceCanAttack(GetPiecesInHorsePositions(house, board), house, isWhiteTurn))
         {
@@ -36,44 +36,44 @@ public class AttackDetector
         return false;
     }
 
-    private Piece[] GetPiecesInHorsePositions(Coordinates position, Board board)
+    private Piece[] GetPiecesInHorsePositions(BoardPosition position, Board board)
     {
-        Coordinates[] moves = new Coordinates[8];
-        moves[0] = new Coordinates(position.x + 2, position.y + 1);
-        moves[1] = new Coordinates(position.x + 2, position.y - 1);
-        moves[2] = new Coordinates(position.x - 2, position.y + 1);
-        moves[3] = new Coordinates(position.x - 2, position.y - 1);
-        moves[4] = new Coordinates(position.x + 1, position.y + 2);
-        moves[5] = new Coordinates(position.x + 1, position.y - 2);
-        moves[6] = new Coordinates(position.x - 1, position.y + 2);
-        moves[7] = new Coordinates(position.x - 1, position.y - 2);
+        BoardPosition[] moves = new BoardPosition[8];
+        moves[0] = new BoardPosition(position.x + 2, position.y + 1);
+        moves[1] = new BoardPosition(position.x + 2, position.y - 1);
+        moves[2] = new BoardPosition(position.x - 2, position.y + 1);
+        moves[3] = new BoardPosition(position.x - 2, position.y - 1);
+        moves[4] = new BoardPosition(position.x + 1, position.y + 2);
+        moves[5] = new BoardPosition(position.x + 1, position.y - 2);
+        moves[6] = new BoardPosition(position.x - 1, position.y + 2);
+        moves[7] = new BoardPosition(position.x - 1, position.y - 2);
         return board.GetPiecesAt(moves);
     }
 
-    private Piece[] GetPiecesInPawnPositions(Coordinates position, bool isWhite, Board board)
+    private Piece[] GetPiecesInPawnPositions(BoardPosition position, bool isWhite, Board board)
     {
-        Coordinates[] moves = new Coordinates[2];
+        BoardPosition[] moves = new BoardPosition[2];
         int direction = isWhite ? 1 : -1;
-        moves[0] = new Coordinates(position.x + direction, position.y - 1);
-        moves[1] = new Coordinates(position.x + direction, position.y + 1);
+        moves[0] = new BoardPosition(position.x + direction, position.y - 1);
+        moves[1] = new BoardPosition(position.x + direction, position.y + 1);
         return board.GetPiecesAt(moves);
     }
 
-    private Piece[] GetPiecesInKingPositions(Coordinates position, Board board)
+    private Piece[] GetPiecesInKingPositions(BoardPosition position, Board board)
     {
-        Coordinates[] moves = new Coordinates[8];
-        moves[0] = new Coordinates(position.x + 1, position.y);
-        moves[1] = new Coordinates(position.x - 1, position.y);
-        moves[2] = new Coordinates(position.x, position.y + 1);
-        moves[3] = new Coordinates(position.x, position.y - 1);
-        moves[4] = new Coordinates(position.x + 1, position.y + 1);
-        moves[5] = new Coordinates(position.x + 1, position.y - 1);
-        moves[6] = new Coordinates(position.x - 1, position.y + 1);
-        moves[7] = new Coordinates(position.x - 1, position.y - 1);
+        BoardPosition[] moves = new BoardPosition[8];
+        moves[0] = new BoardPosition(position.x + 1, position.y);
+        moves[1] = new BoardPosition(position.x - 1, position.y);
+        moves[2] = new BoardPosition(position.x, position.y + 1);
+        moves[3] = new BoardPosition(position.x, position.y - 1);
+        moves[4] = new BoardPosition(position.x + 1, position.y + 1);
+        moves[5] = new BoardPosition(position.x + 1, position.y - 1);
+        moves[6] = new BoardPosition(position.x - 1, position.y + 1);
+        moves[7] = new BoardPosition(position.x - 1, position.y - 1);
         return board.GetPiecesAt(moves);
     }
 
-    private Piece[] GetSlidingPieces(Coordinates position, Board board)
+    private Piece[] GetSlidingPieces(BoardPosition position, Board board)
     {
         Piece rightDirPiece = GetPieceInDirection(position, "right", board);
         Piece leftDirPiece = GetPieceInDirection(position, "left", board);
@@ -87,7 +87,7 @@ public class AttackDetector
         return pieces;
     }
 
-    private bool CheckIfAnyPieceCanAttack(Piece[] pieces, Coordinates position, bool isWhiteTurn)
+    private bool CheckIfAnyPieceCanAttack(Piece[] pieces, BoardPosition position, bool isWhiteTurn)
     {
 
         foreach (Piece piece in pieces)
@@ -103,7 +103,7 @@ public class AttackDetector
         return isWhiteTurn != piece.IsWhite();
     }
 
-    private Piece GetPieceInDirection(Coordinates position, String direction, Board board)
+    private Piece GetPieceInDirection(BoardPosition position, String direction, Board board)
     {
         Piece piece = null;
         Vector2 dir = directions[direction];
@@ -112,7 +112,7 @@ public class AttackDetector
             dir = directions[direction] * i;
             if (position.x + dir.x >= 0 && position.y + dir.y >= 0 && position.x + dir.x < 8 && position.y + dir.y < 8)
             {
-                piece = board.GetPieceAt(new Coordinates((int)(position.x + dir.x), (int)(position.y + dir.y)));
+                piece = board.GetPieceAt(new BoardPosition((int)(position.x + dir.x), (int)(position.y + dir.y)));
             }
             if (piece != null)
             {
