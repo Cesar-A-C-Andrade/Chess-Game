@@ -17,6 +17,7 @@ public class TableUI : MonoBehaviour
     ObjectPool<GameObject> markerPrefabsPool;
 
     Event<OnHouseSelectedEvent> onHouseSelectedEvent = new Event<OnHouseSelectedEvent>();
+    Event<OnShowPromotionSelection> onShowPromotionSelectionEvent = new Event<OnShowPromotionSelection>();
 
     void Start()
     {
@@ -25,6 +26,7 @@ public class TableUI : MonoBehaviour
         EventBus.instance.AddBroadCaster(onHouseSelectedEvent);
         EventBus.instance.Subscribe<OnTableChangedEvent>(HandleTableChanged);
         EventBus.instance.Subscribe<OnPieceSelectedEvent>(HandlePieceSelected);
+        EventBus.instance.Subscribe<OnPawnReachedPromotion>(HandlePawnReachedPromotion);
         for (int i = 0; i < 8; i++)
         {
             for (int j = 0; j < 8; j++)
@@ -58,7 +60,7 @@ public class TableUI : MonoBehaviour
 
     void onHouseSelected(int x, int y)
     {
-        Coordinates coordinates = new Coordinates(x, y);
+        BoardPosition coordinates = new BoardPosition(x, y);
         OnHouseSelectedEvent _event = new OnHouseSelectedEvent(coordinates);
         EventBus.instance.Invoke(_event);
     }
@@ -86,7 +88,7 @@ public class TableUI : MonoBehaviour
     void HandlePieceSelected(OnPieceSelectedEvent _event)
     {
         markerPrefabsPool.ReturnAllToPool(TurnOffMarker);
-        foreach (Coordinates possibleMove in _event.possibleMovesCoordinates)
+        foreach (BoardPosition possibleMove in _event.possibleMovesCoordinates)
         {
             Transform button = transform.GetChild(possibleMove.x * 7 + possibleMove.y + possibleMove.x);
             GameObject marker = markerPrefabsPool.GetOjbectFromPool();
@@ -107,4 +109,13 @@ public class TableUI : MonoBehaviour
     {
         marker.SetActive(false);
     }
+
+    void HandlePawnReachedPromotion(OnPawnReachedPromotion data)
+    {
+        BoardPosition pawnPosition = data.pawnPosition;
+        Vector2 _position = transform.GetChild(pawnPosition.x * 7 + pawnPosition.y + pawnPosition.x).position;
+        EventBus.instance.Invoke<OnShowPromotionSelection>(new OnShowPromotionSelection(_position));
+        
+    }
+
 }

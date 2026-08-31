@@ -24,8 +24,8 @@ public class XequeManager
         Piece[] pieces = isWhiteTurn ? board.GetPiecesByColor("White") : board.GetPiecesByColor("Black");
         foreach (Piece piece in pieces)
         {
-            Coordinates piecePosition = piece.GetPosition();
-            foreach (Coordinates move in piece.GenerateMoves(board))
+            BoardPosition piecePosition = piece.GetPosition();
+            foreach (BoardPosition move in piece.GenerateMoves(board))
             {
                 possibleMove = board.MovePiece(piecePosition, move);
                 if (!(XequeChecker(board, isWhiteTurn)))
@@ -37,7 +37,7 @@ public class XequeManager
             //Test En Passant
             if (piece is Pawn)
             {
-                Coordinates enPassant = specialMoveManager.GetEnPassantCoordinate(lastMovement, piece as Pawn);
+                BoardPosition enPassant = specialMoveManager.GetEnPassantCoordinate(lastMovement, piece as Pawn);
                 if (enPassant.x != -1)
                 {
                     possibleMove = specialMoveManager.MakeEnPassant(piece as Pawn, lastMovement, board);

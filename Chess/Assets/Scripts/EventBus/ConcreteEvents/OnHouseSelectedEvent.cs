@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class OnHouseSelectedEvent : IEvent
 {
-    public Coordinates houseSelectedCoordinates { get; private set; }
+    public BoardPosition houseSelectedCoordinates { get; private set; }
 
-    public OnHouseSelectedEvent(Coordinates coordinates)
+    public OnHouseSelectedEvent(BoardPosition coordinates)
     {
         houseSelectedCoordinates = coordinates;
     }

@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class OnPieceSelectedEvent : IEvent
 {
-    public Coordinates[] possibleMovesCoordinates {  get; private set; }
+    public BoardPosition[] possibleMovesCoordinates {  get; private set; }
 
-    public OnPieceSelectedEvent(Coordinates[] coordinates)
+    public OnPieceSelectedEvent(BoardPosition[] coordinates)
     {
         possibleMovesCoordinates = coordinates;
     }

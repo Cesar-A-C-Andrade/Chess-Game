@@ -1,7 +1,9 @@
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEngine.Audio.ProcessorInstance;
 
 
 public class LogicController : MonoBehaviour
@@ -13,8 +15,9 @@ public class LogicController : MonoBehaviour
     private Move lastMovement;
     private bool isWhiteTurn = true;
     private Piece pieceSelected = null;
-    private Coordinates[] validMovesForPieceSelected = null;
+    private BoardPosition[] validMovesForPieceSelected = null;
     private bool resetGame = false;
+    private bool isWaitingForPromotion = false;
 
     Board board;
     MoveValidator moveValidator = new MoveValidator();
@@ -22,10 +25,14 @@ public class LogicController : MonoBehaviour
     XequeManager xequeManager = new XequeManager();
     SpecialMoveManager specialMoveManager = new SpecialMoveManager();
 
+    Event<OnPawnReachedPromotion> onPawnReachedPromotionEvent = new Event<OnPawnReachedPromotion>();
+
 
     void Start()
     {
         EventBus.instance.Subscribe<OnHouseSelectedEvent>(HandleHouseSelectedEvent);
+        EventBus.instance.AddBroadCaster(onPawnReachedPromotionEvent);
+        EventBus.instance.Subscribe<OnPawnPromoted>(HandlePawnPromotion);
         StartGame();
     }
 
@@ -37,12 +44,12 @@ public class LogicController : MonoBehaviour
         isWhiteTurn = true;
         pieceSelected = null;
         validMovesForPieceSelected = null;
-        lastMovement = new Move(null, null, new Coordinates(-1, -1), new Coordinates(-1, -1), false, false);
+        lastMovement = new Move(null, null, new BoardPosition(-1, -1), new BoardPosition(-1, -1), false, false);
         stateManager.SaveState(lastMovement, board.DuplicateBoard(), isWhiteTurn);
 
     }
 
-    void MovePiece(Coordinates to)
+    void MovePiece(BoardPosition to)
     {
         if (specialMoveManager.IsSpecialMove(pieceSelected, stateManager.LoadLastState(), to))
         {
@@ -51,6 +58,13 @@ public class LogicController : MonoBehaviour
             return;
         }
         lastMovement = board.MovePiece(pieceSelected.GetPosition(), to);
+        if (specialMoveManager.PawnReachesPromotion(pieceSelected))
+        {
+            BoardPosition pawnPosition = pieceSelected.GetPosition();
+            EventBus.instance.Invoke<OnPawnReachedPromotion>(new OnPawnReachedPromotion(pawnPosition));
+            isWaitingForPromotion = true;
+            return;
+        }
         ChangeTurn();
     }
 
@@ -71,62 +85,53 @@ public class LogicController : MonoBehaviour
         }
     }
 
-    public void OnPieceSelected(Coordinates pieceLocation)
+    public void OnPieceSelected(BoardPosition pieceLocation)
     {
-        stateManager.SaveState(lastMovement, board.DuplicateBoard(), isWhiteTurn);
         Piece piece = board.GetPieceAt(pieceLocation);
         if (piece.IsWhite() != isWhiteTurn)
         {
             Debug.Log("Not your turn");
             return;
         }
-
-        List<Coordinates> moves = new List<Coordinates>();
-        foreach (Coordinates move in moveValidator.ValidateMoves(piece, piece.GenerateMoves(board), stateManager.LoadLastState()))
-        {
-            moves.Add(move);
-        }
-        Coordinates[] specialMoves = specialMoveManager.GetSpecialMoveCoordinates(stateManager.LoadLastState(), piece);
-        foreach (Coordinates move in moveValidator.ValidateMoves(piece, specialMoves, stateManager.LoadLastState()))
-        {
-            moves.Add(move);
-        }
-        EventBus.instance.Invoke<OnPieceSelectedEvent>(new OnPieceSelectedEvent(moves.ToArray()));
+        BoardPosition[] moves = GetPieceMoves(piece);
+        EventBus.instance.Invoke<OnPieceSelectedEvent>(new OnPieceSelectedEvent(moves));
         pieceSelected = piece;
-        validMovesForPieceSelected = moves.ToArray();
-        //Enviar as coordenadas para o board UI marcar as posições que o usuário pode clicar no board.
-
+        validMovesForPieceSelected = moves;
     }
 
-    public bool IsValidMoveForSelectedPiece(Coordinates move)
+    BoardPosition[] GetPieceMoves(Piece piece)
     {
-        foreach (Coordinates validMove in validMovesForPieceSelected)
+        List<BoardPosition> moves = new List<BoardPosition>();
+        GameState currentState = stateManager.LoadLastState();
+
+        moveValidator.ValidateMoves(piece, piece.GenerateMoves(currentState.board), currentState, ref moves);
+
+        BoardPosition[] specialMoves = specialMoveManager.GetSpecialMoveCoordinates(currentState, piece);
+
+        moveValidator.ValidateMoves(piece, specialMoves, currentState, ref moves);
+
+        return moves.ToArray();
+    }
+
+    public bool IsValidMoveForSelectedPiece(BoardPosition move)
+    {
+        foreach (BoardPosition validMove in validMovesForPieceSelected)
         {
             if (validMove.Equals(move)) return true;
         }
         return false;
     }
 
-    public void OnPieceMoved(Coordinates newPieceLocation)
+    public void OnPieceMoved(BoardPosition newPieceLocation)
     {
         if (!(IsValidMoveForSelectedPiece(newPieceLocation))) { Debug.Log("Movimento invalido, tente outro por favor"); return; }
         MovePiece(newPieceLocation);
         if (resetGame) { StartGame(); return; }
+        if (isWaitingForPromotion) { return; }
         EventBus.instance.Invoke<OnTableChangedEvent>(new OnTableChangedEvent(board.ConvertBoardIntoStringData(), board.ConvertBoardIntoColorsData()));
     }
-
-    public Move GetLastMove()
-    {
-        return lastMovement;
-    }
-
-    public void TestButtonPressed()
-    {
-        Coordinates coordinates = new Coordinates(int.Parse(inputField.text[0].ToString()), int.Parse(inputField.text[1].ToString()));
-        OnHousePressed(coordinates);
-    }
      
-    public void OnHousePressed(Coordinates house)
+    public void OnHousePressed(BoardPosition house)
     {
         if(pieceSelected != null)
         {
@@ -150,23 +155,33 @@ public class LogicController : MonoBehaviour
         OnHousePressed(_event.houseSelectedCoordinates);
     }
 
+    void HandlePawnPromotion(OnPawnPromoted _event)
+    {
+        if (!isWaitingForPromotion) { return; }
+        isWaitingForPromotion = false;
+        BoardPosition pawnPosition = pieceSelected.GetPosition();
+        board.CreateAndPlacePiece(_event.pieceType, pawnPosition.x, pawnPosition.y, pieceSelected.IsWhite());
+        ChangeTurn();
+        EventBus.instance.Invoke<OnTableChangedEvent>(new OnTableChangedEvent(board.ConvertBoardIntoStringData(), board.ConvertBoardIntoColorsData()));
+    }
+
 }
 
 public struct Move
 {
     public Piece pieceMoved;
     public Piece secondPieceMoved;
-    public Coordinates lastCoordinate;
-    public Coordinates newCoordinate;
+    public BoardPosition lastCoordinate;
+    public BoardPosition newCoordinate;
     public bool isShortHoque;
     public bool isGrandHoque;
 
-    public Move(Piece piece, Piece destroyed, Coordinates lastCoordinates, Coordinates newCoordinates, bool isShortHoque, bool isGrandHoque)
+    public Move(Piece piece, Piece secondPiece, BoardPosition lastCoordinates, BoardPosition newCoordinates, bool isShortHoque, bool isGrandHoque)
     {
         this.pieceMoved = piece;
         this.lastCoordinate = lastCoordinates; 
         this.newCoordinate = newCoordinates;
-        this.secondPieceMoved = destroyed;
+        this.secondPieceMoved = secondPiece;
         this.isShortHoque = isShortHoque;
         this.isGrandHoque = isGrandHoque;
     }
@@ -194,18 +209,18 @@ public struct Move
 }
 
 
-public struct Coordinates
+public struct BoardPosition
 {
     public int x;
     public int y;
 
-    public Coordinates(int x, int y)
+    public BoardPosition(int x, int y)
     {
         this.x = x;
         this.y = y;
     }
 
-    public bool Equals(Coordinates coordinate)
+    public bool Equals(BoardPosition coordinate)
     {
         if (coordinate.x != this.x) return false;
         if (coordinate.y != this.y) return false;

@@ -12,14 +12,9 @@ public class GameStateManager
 
     public GameState LoadLastState()
     {
-        return lastState;
+        return lastState.Duplicate();
     }
 
-    public void PrintState()
-    {
-        Debug.Log($"Turn {lastState.isWhiteTurn}");
-        lastState.lastMovement.PrintMovement();
-    }
     
 }
 
@@ -37,4 +32,10 @@ public struct GameState
         this.board = board;
         this.isWhiteTurn = isWhiteTurn;
     }
+
+    public GameState Duplicate() 
+    { 
+        return new GameState(this.lastMovement, this.board.DuplicateBoard(), this.isWhiteTurn);
+    }
+
 }

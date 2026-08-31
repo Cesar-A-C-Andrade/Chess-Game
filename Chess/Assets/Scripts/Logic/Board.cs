@@ -6,8 +6,8 @@ using UnityEngine;
 public class Board
 {
     private Piece[,] table = new Piece[8, 8];
-    private Coordinates blackKingPosition;
-    private Coordinates whiteKingPosition;
+    private BoardPosition blackKingPosition;
+    private BoardPosition whiteKingPosition;
 
     Event<OnTableChangedEvent> onTableChangedEvent = new Event<OnTableChangedEvent>();
 
@@ -41,8 +41,8 @@ public class Board
         CreateAndPlacePiece("queen", 0, 4, true);
         CreateAndPlacePiece("queen", 7, 4, false);
 
-        whiteKingPosition = new Coordinates(0, 3);
-        blackKingPosition = new Coordinates(7, 3);
+        whiteKingPosition = new BoardPosition(0, 3);
+        blackKingPosition = new BoardPosition(7, 3);
         EventBus.instance.Invoke<OnTableChangedEvent>(new OnTableChangedEvent(ConvertBoardIntoStringData(), ConvertBoardIntoColorsData()));
     }
 
@@ -56,11 +56,11 @@ public class Board
         CreateAndPlacePiece("king", 7, 3, false);
 
 
-        blackKingPosition = new Coordinates(7, 3);
-        whiteKingPosition = new Coordinates(0, 3);
+        blackKingPosition = new BoardPosition(7, 3);
+        whiteKingPosition = new BoardPosition(0, 3);
     }
 
-    public Piece GetPieceAt(Coordinates coordinates)
+    public Piece GetPieceAt(BoardPosition coordinates)
     {
         if (!IsValidCoordinate(coordinates)) return null;
         Piece _piece = table[coordinates.x, coordinates.y];
@@ -72,10 +72,10 @@ public class Board
         return null;
     }
 
-    public Piece[] GetPiecesAt(Coordinates[] coordinates)
+    public Piece[] GetPiecesAt(BoardPosition[] coordinates)
     {
         List<Piece> pieces = new List<Piece>();
-        foreach (Coordinates position in coordinates)
+        foreach (BoardPosition position in coordinates)
         {
             Piece piece = GetPieceAt(position);
             if (piece != null)
@@ -86,7 +86,7 @@ public class Board
         return pieces.ToArray();
     }
 
-    public Move MovePiece(Coordinates from, Coordinates to)
+    public Move MovePiece(BoardPosition from, BoardPosition to)
     {
         Piece pieceToMove = GetPieceAt(from);
         Piece pieceInLocation = GetPieceAt(to);
@@ -105,7 +105,7 @@ public class Board
         return new Move(null, null, from, to, false, false);
     }
 
-    public void PlacePiece(Piece piece, Coordinates coordinates)
+    public void PlacePiece(Piece piece, BoardPosition coordinates)
     {
         if (!IsValidCoordinate(coordinates)) return;
         table[coordinates.x, coordinates.y] = piece;
@@ -114,11 +114,11 @@ public class Board
 
     public void CreateAndPlacePiece(string pieceType, int xCoordinate, int yCoordinate, bool isPieceWhite)
     {
-        Coordinates pieceCoordinate = new Coordinates(xCoordinate, yCoordinate);
+        BoardPosition pieceCoordinate = new BoardPosition(xCoordinate, yCoordinate);
         PlacePiece(PieceFactory(pieceType, isPieceWhite), pieceCoordinate);
     }
 
-    public void RemovePieceAt(Coordinates from)
+    public void RemovePieceAt(BoardPosition from)
     {
         Piece removedPiece = GetPieceAt(from);
         removedPiece = null;
@@ -146,12 +146,12 @@ public class Board
         }
     }
 
-    public Coordinates GetKingPosition(bool isWhite)
+    public BoardPosition GetKingPosition(bool isWhite)
     {
         return isWhite ? whiteKingPosition : blackKingPosition;
     }
 
-    public void SetKingPosition(bool isWhite, Coordinates newPos)
+    public void SetKingPosition(bool isWhite, BoardPosition newPos)
     {
         if (isWhite)
         {
@@ -162,7 +162,7 @@ public class Board
         return;
     }
 
-    public bool IsValidCoordinate(Coordinates position)
+    public bool IsValidCoordinate(BoardPosition position)
     {
         return position.x >= 0 && position.x < 8 && position.y >= 0 && position.y < 8;
     }
@@ -177,19 +177,19 @@ public class Board
                 if (table[i, j] != null)
                 {
                     Piece newPiece = table[i, j].DuplicatePiece();
-                    board.PlacePiece(newPiece, new Coordinates(i, j));
+                    board.PlacePiece(newPiece, new BoardPosition(i, j));
                 }
                 
                     
             }
         }
-        board.blackKingPosition = new Coordinates(blackKingPosition.x, blackKingPosition.y);
-        board.whiteKingPosition = new Coordinates(whiteKingPosition.x, whiteKingPosition.y);
+        board.blackKingPosition = new BoardPosition(blackKingPosition.x, blackKingPosition.y);
+        board.whiteKingPosition = new BoardPosition(whiteKingPosition.x, whiteKingPosition.y);
 
         return board;
     }
 
-    public bool IsEmptyHouse(Coordinates position)
+    public bool IsEmptyHouse(BoardPosition position)
     {
         if (!(IsValidCoordinate(position)))
         {
@@ -236,7 +236,7 @@ public class Board
     public Piece PieceFactory(string pieceType, bool pieceIsWhite)
     {
         Piece piece;
-        switch (pieceType)
+        switch (pieceType.ToLower())
         {
             case "pawn":
                 piece = new Pawn();

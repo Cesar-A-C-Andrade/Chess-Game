@@ -8,32 +8,27 @@ public class MoveValidator
 {
     private AttackDetector detector = new AttackDetector();
 
-    public Coordinates[] ValidateMoves(Piece piece, Coordinates[] moves, GameState currentState)
+    public void ValidateMoves(Piece piece, BoardPosition[] moves, GameState currentState, ref List<BoardPosition> validMovesList)
     {
         Board board = currentState.board;
         bool isWhiteTurn = currentState.isWhiteTurn;
-        Coordinates piecePosition = piece.GetPosition();
-        List<Coordinates> validMoves = new List<Coordinates>();
+        BoardPosition piecePosition = piece.GetPosition();
 
-        foreach (Coordinates move in moves)
+        foreach (BoardPosition move in moves)
         {
-            Coordinates validatedMove = ValidateMove(piece, move, currentState);
+            BoardPosition validatedMove = ValidateMove(piece, move, currentState);
             if (validatedMove.IsEmpty()) { continue; }
-            validMoves.Add(validatedMove);
+            validMovesList.Add(validatedMove);
         }
-
-        return validMoves.ToArray();
-        
+        return;
     }
 
-    public Coordinates ValidateMove(Piece piece, Coordinates move, GameState currentState)
+    public BoardPosition ValidateMove(Piece piece, BoardPosition move, GameState currentState)
     {
-        Debug.Log("Move valideting move: ");
-        move.PrintCoordinates();
         Board board = currentState.board;
         bool isWhiteTurn = currentState.isWhiteTurn;
-        Coordinates piecePosition = piece.GetPosition();
-        Coordinates validMoves = new Coordinates(-1, -1);
+        BoardPosition piecePosition = piece.GetPosition();
+        BoardPosition validMoves = new BoardPosition(-1, -1);
         if (move.IsEmpty()) return validMoves;
         board.MovePiece(piecePosition, move);
         if (!(detector.IsHouseUnderAttack(board, board.GetKingPosition(isWhiteTurn), isWhiteTurn)))
